@@ -38,6 +38,9 @@
 @interface CDVInAppBrowser () {
     NSInteger _previousStatusBarStyle;
 }
+
+@property (nonatomic, assign) BOOL navigationBarEnabled;
+
 @end
 
 @implementation CDVInAppBrowser
@@ -196,7 +199,28 @@
         self.inAppBrowserViewController.webView.keyboardDisplayRequiresUserAction = browserOptions.keyboarddisplayrequiresuseraction;
         self.inAppBrowserViewController.webView.suppressesIncrementalRendering = browserOptions.suppressesincrementalrendering;
     }
-
+    
+    // UINavigationBar options
+    self.navigationBarEnabled = browserOptions.navbar;
+    id navBarAppearance = [UINavigationBar appearanceWhenContainedIn:[CDVInAppBrowserNavigationController class], nil];
+    [navBarAppearance setBarTintColor:browserOptions.navbarbackgroundcolor];
+    [navBarAppearance setTranslucent:browserOptions.navbartranslucent];
+    id barButtonAppearance = [UIBarButtonItem appearanceWhenContainedIn:[UINavigationBar class],[CDVInAppBrowserNavigationController class], nil];
+    [barButtonAppearance setTintColor:browserOptions.navbarbuttoncolor];
+    UIFont *font = nil;
+    if (browserOptions.navbarbuttonfont) {
+        if (browserOptions.navbarbuttonfontsize) {
+            font = [UIFont fontWithName:browserOptions.navbarbuttonfont
+                                   size:[browserOptions.navbarbuttonfontsize floatValue]];
+        } else {
+            font = [UIFont fontWithName:browserOptions.navbarbuttonfont
+                                   size:16.0];
+        }
+    }
+    [barButtonAppearance setTitleTextAttributes:font ? @{ NSFontAttributeName:font } : nil
+                                       forState:UIControlStateNormal];
+    
+    
     [self.inAppBrowserViewController navigateTo:url];
     if (!browserOptions.hidden) {
         [self show:nil];
@@ -219,7 +243,11 @@
     CDVInAppBrowserNavigationController* nav = [[CDVInAppBrowserNavigationController alloc]
                                    initWithRootViewController:self.inAppBrowserViewController];
     nav.orientationDelegate = self.inAppBrowserViewController;
-    nav.navigationBarHidden = YES;
+    nav.navigationBarHidden = !self.navigationBarEnabled;
+    UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
+                                                                                target:self.inAppBrowserViewController
+                                                                                action:@selector(close)];
+    self.inAppBrowserViewController.navigationItem.rightBarButtonItem = doneButton;
     // Run later to avoid the "took a long time" log message.
     dispatch_async(dispatch_get_main_queue(), ^{
         if (self.inAppBrowserViewController != nil) {
@@ -921,6 +949,13 @@
         self.suppressesincrementalrendering = NO;
         self.hidden = NO;
         self.disallowoverscroll = NO;
+        
+        self.navbar = NO;
+        self.navbartranslucent = YES;
+        self.navbarbackgroundcolor = nil;
+        self.navbarbuttoncolor = nil;
+        self.navbarbuttonfont = nil;
+        self.navbarbuttonfontsize = nil;
     }
 
     return self;
@@ -954,13 +989,49 @@
                 } else if (isBoolean) {
                     [obj setValue:[NSNumber numberWithBool:[value_lc isEqualToString:@"yes"]] forKey:key];
                 } else {
-                    [obj setValue:value forKey:key];
+                    UIColor *color = [self parseColor:value];
+                    if (color) {
+                        [obj setValue:color forKey:key];
+                    } else {
+                        [obj setValue:value forKey:key];
+                    }
                 }
             }
         }
     }
 
     return obj;
+}
+
++ (UIColor *)parseColor:(NSString *)hexString
+{
+    if (hexString.length < 7 || hexString.length > 9) {
+        return nil;
+    }
+
+    if (hexString.length == 7) {
+        hexString = [hexString stringByAppendingString:@"ff"];
+    }
+
+    NSScanner *scanner = [NSScanner scannerWithString:hexString];
+    
+    if (![scanner scanString:@"#" intoString:NULL]) {
+        return nil;
+    }
+    
+    unsigned hexValue = 0;
+    if (![scanner scanHexInt:&hexValue]) {
+        return nil;
+    }
+    
+    CGFloat r, g, b, a;
+    
+    r = ( ( hexValue & 0xff000000 ) >> 24 ) / 255.0;
+    g = ( ( hexValue & 0x00ff0000 ) >> 16 ) / 255.0;
+    b = ( ( hexValue & 0x0000ff00 ) >> 8  ) / 255.0;
+    a = ( ( hexValue & 0x000000ff ) >> 0  ) / 255.0;
+    
+    return [UIColor colorWithRed:r green:g blue:b alpha:a];
 }
 
 @end

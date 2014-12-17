@@ -59,6 +59,13 @@
 @property (nonatomic, assign) BOOL hidden;
 @property (nonatomic, assign) BOOL disallowoverscroll;
 
+@property (nonatomic, assign) BOOL navbar;
+@property (nonatomic, assign) BOOL navbartranslucent;
+@property (nonatomic, copy) UIColor *navbarbackgroundcolor;
+@property (nonatomic, copy) UIColor *navbarbuttoncolor;
+@property (nonatomic, copy) NSString *navbarbuttonfont;
+@property (nonatomic, copy) NSNumber *navbarbuttonfontsize;
+
 + (CDVInAppBrowserOptions*)parseOptions:(NSString*)options;
 
 @end
