@@ -65,6 +65,7 @@
 @property (nonatomic, copy) UIColor *navbarbuttoncolor;
 @property (nonatomic, copy) NSString *navbarbuttonfont;
 @property (nonatomic, copy) NSNumber *navbarbuttonfontsize;
+@property (nonatomic, copy) NSString *title;
 
 + (CDVInAppBrowserOptions*)parseOptions:(NSString*)options;
 

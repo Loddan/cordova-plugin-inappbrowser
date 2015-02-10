@@ -40,6 +40,7 @@
 }
 
 @property (nonatomic, assign) BOOL navigationBarEnabled;
+@property (nonatomic, copy) NSString *title;
 
 @end
 
@@ -202,13 +203,22 @@
     
     // UINavigationBar options
     self.navigationBarEnabled = browserOptions.navbar;
+    self.title = browserOptions.title;
     id navBarAppearance = [UINavigationBar appearanceWhenContainedIn:[CDVInAppBrowserNavigationController class], nil];
-    [navBarAppearance setBarTintColor:browserOptions.navbarbackgroundcolor];
-    [navBarAppearance setTranslucent:browserOptions.navbartranslucent];
+    if (browserOptions.navbarbackgroundcolor) {
+        [navBarAppearance setBarTintColor:browserOptions.navbarbackgroundcolor];
+    }
+    if (browserOptions.navbartranslucent) {
+        [navBarAppearance setTranslucent:browserOptions.navbartranslucent];
+    }
+    
     id barButtonAppearance = [UIBarButtonItem appearanceWhenContainedIn:[UINavigationBar class],[CDVInAppBrowserNavigationController class], nil];
-    [barButtonAppearance setTintColor:browserOptions.navbarbuttoncolor];
-    UIFont *font = nil;
+    if (browserOptions.navbarbuttoncolor) {
+        [barButtonAppearance setTintColor:browserOptions.navbarbuttoncolor];
+    }
+    
     if (browserOptions.navbarbuttonfont) {
+        UIFont *font = nil;
         if (browserOptions.navbarbuttonfontsize) {
             font = [UIFont fontWithName:browserOptions.navbarbuttonfont
                                    size:[browserOptions.navbarbuttonfontsize floatValue]];
@@ -216,9 +226,10 @@
             font = [UIFont fontWithName:browserOptions.navbarbuttonfont
                                    size:16.0];
         }
+        
+        [barButtonAppearance setTitleTextAttributes:font ? @{ NSFontAttributeName:font } : nil
+                                           forState:UIControlStateNormal];
     }
-    [barButtonAppearance setTitleTextAttributes:font ? @{ NSFontAttributeName:font } : nil
-                                       forState:UIControlStateNormal];
     
     
     [self.inAppBrowserViewController navigateTo:url];
@@ -244,6 +255,7 @@
                                    initWithRootViewController:self.inAppBrowserViewController];
     nav.orientationDelegate = self.inAppBrowserViewController;
     nav.navigationBarHidden = !self.navigationBarEnabled;
+    self.inAppBrowserViewController.title = self.title;
     UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
                                                                                 target:self.inAppBrowserViewController
                                                                                 action:@selector(close)];
@@ -956,6 +968,7 @@
         self.navbarbuttoncolor = nil;
         self.navbarbuttonfont = nil;
         self.navbarbuttonfontsize = nil;
+        self.title = nil;
     }
 
     return self;
