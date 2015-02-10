@@ -146,6 +146,8 @@
         NSString* originalUA = [CDVUserAgentUtil originalUserAgent];
         self.inAppBrowserViewController = [[CDVInAppBrowserViewController alloc] initWithUserAgent:originalUA prevUserAgent:[self.commandDelegate userAgent] browserOptions: browserOptions];
         self.inAppBrowserViewController.navigationDelegate = self;
+        
+        [self.inAppBrowserViewController setPreferredStatusBarStyle:browserOptions.preferredStatusBarStyle];
 
         if ([self.viewController conformsToProtocol:@protocol(CDVScreenOrientationDelegate)]) {
             self.inAppBrowserViewController.orientationDelegate = (UIViewController <CDVScreenOrientationDelegate>*)self.viewController;
@@ -509,6 +511,11 @@
     return self;
 }
 
+- (void)setPreferredStatusBarStyle:(UIStatusBarStyle)style
+{
+    _preferredStatusBarStyle = style;
+}
+
 - (void)createViews
 {
     // We create the views in code for primarily for ease of upgrades and not requiring an external .xib to be included
@@ -768,7 +775,7 @@
 
 - (UIStatusBarStyle)preferredStatusBarStyle
 {
-    return UIStatusBarStyleDefault;
+    return _preferredStatusBarStyle;
 }
 
 - (void)close
@@ -969,6 +976,7 @@
         self.navbarbuttonfont = nil;
         self.navbarbuttonfontsize = nil;
         self.title = nil;
+        self.statusbarstyle = nil;
     }
 
     return self;
@@ -1045,6 +1053,15 @@
     a = ( ( hexValue & 0x000000ff ) >> 0  ) / 255.0;
     
     return [UIColor colorWithRed:r green:g blue:b alpha:a];
+}
+
+- (UIStatusBarStyle)preferredStatusBarStyle
+{
+    UIStatusBarStyle style = UIStatusBarStyleDefault;
+    if ([self.statusbarstyle isEqualToString:@"lightContent"]) {
+        style = UIStatusBarStyleLightContent;
+    }
+    return style;
 }
 
 @end

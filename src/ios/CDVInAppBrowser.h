@@ -66,8 +66,11 @@
 @property (nonatomic, copy) NSString *navbarbuttonfont;
 @property (nonatomic, copy) NSNumber *navbarbuttonfontsize;
 @property (nonatomic, copy) NSString *title;
+@property (nonatomic, copy) NSString *statusbarstyle;
 
 + (CDVInAppBrowserOptions*)parseOptions:(NSString*)options;
+
+@property (nonatomic, readonly) UIStatusBarStyle preferredStatusBarStyle;
 
 @end
 
@@ -78,6 +81,7 @@
     NSInteger _userAgentLockToken;
     CDVInAppBrowserOptions *_browserOptions;
     CDVWebViewDelegate* _webViewDelegate;
+    UIStatusBarStyle _preferredStatusBarStyle;
 }
 
 @property (nonatomic, strong) IBOutlet UIWebView* webView;
@@ -99,6 +103,8 @@
 - (void)setCloseButtonTitle:(NSString*)title;
 
 - (id)initWithUserAgent:(NSString*)userAgent prevUserAgent:(NSString*)prevUserAgent browserOptions: (CDVInAppBrowserOptions*) browserOptions;
+
+- (void)setPreferredStatusBarStyle:(UIStatusBarStyle)style;
 
 @end
 
