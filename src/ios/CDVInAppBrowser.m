@@ -210,7 +210,7 @@
     if (browserOptions.navbarbackgroundcolor) {
         [navBarAppearance setBarTintColor:browserOptions.navbarbackgroundcolor];
     }
-    if (browserOptions.navbartranslucent) {
+    if (IsAtLeastiOSVersion(@"8.0") && browserOptions.navbartranslucent) {
         [navBarAppearance setTranslucent:browserOptions.navbartranslucent];
     }
     
